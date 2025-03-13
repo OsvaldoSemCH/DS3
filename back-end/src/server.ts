@@ -1,6 +1,10 @@
-import { AttemptCapture } from "./services/pokemon.ts";
+import express from 'express'
+import cors from 'cors'
+import InitRoutes from './routes/routes.ts';
 
-for(let x = 0; x <= 100; ++x)
-{
-    console.log((await AttemptCapture(150))?.name);
-}
+const port = 8080;
+const app = express();
+app.use(cors());
+InitRoutes(app);
+
+app.listen(port, () => console.log("Api rodando na porta 8080"))

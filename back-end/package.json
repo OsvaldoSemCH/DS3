@@ -26,6 +26,7 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "config": "^3.3.12",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",

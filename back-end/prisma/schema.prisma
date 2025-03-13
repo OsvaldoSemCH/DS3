@@ -13,9 +13,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Player {
+  Id Int @id @default(autoincrement())
+  Name String @unique
+  Password String
+  Team Pokemon[]
+}
+
 model Pokemon {
     Id Int @id @default(autoincrement())
     Number Int
-    Name String
     Nickname String
+    IdTrainer Int
+    Trainer Player @relation(fields: [IdTrainer], references: [Id])
 }
