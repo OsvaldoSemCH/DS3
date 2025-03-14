@@ -36,7 +36,7 @@ export async function AttemptCapture(id : number) : Promise<IPokemon | null>
 
         const CapChance = ((100 / Bmi) * Exp)
 
-        if(Math.random() < CapChance)
+        if(Math.random() < CapChance % 100)
         {
             return Pkmn;
         }
