@@ -18,11 +18,8 @@ interface IPokemon
 
 export default function Home()
 {
-    document.addEventListener('contextmenu', (e) =>
-    {
-      e.preventDefault();
-    })
     const [Pokemon, SetPokemon] = useState<IPokemon[]>([]);
+    const [Selection, SetSelection] = useState<Set<number>>(new Set([]));
 
     useEffect(() =>
     {
@@ -41,24 +38,85 @@ export default function Home()
         })
     }, [])
 
-    function Clickma(e : MouseEvent)
+    function Clickma(e : MouseEvent, index : number)
     {
-        console.log(`Shift: ${e.shiftKey}\nCtrl: ${e.ctrlKey}\nMouse Button: ${e.button}`)
+        const Ctrl = e.ctrlKey
+        const Shift = e.shiftKey
+
+        if(Shift)
+        {
+            
+        }else
+        if(Ctrl)
+        {
+            if(Selection.has(index))
+            {
+                let S = new Set(Selection)
+                S.delete(index)
+                SetSelection(S);
+                return
+            }
+            let S = new Set(Selection)
+            S.add(index)
+            SetSelection(S)
+        }else
+        {
+            if(Selection.size == 1 && Selection.has(index))
+            {
+                SetSelection(new Set([]))
+            }else
+            {
+                SetSelection(new Set([index]));
+            }
+        }
     }
 
+    function DoubleClickma(e : MouseEvent, index : number)
+    {
+        const Ctrl = e.ctrlKey
+        const Shift = e.shiftKey
+
+        let List = new Set([index])
+        let Comp = Pokemon[index].pokedex;
+
+        for(let i = index + 1; i < Pokemon.length; ++i)
+        {
+            if(Pokemon[i].pokedex == Comp)
+            {
+                List.add(i)
+            }else
+            {
+                break;
+            }
+        }
+
+        if(Ctrl || Shift)
+        {
+            SetSelection(List.union(Selection))
+        }else
+        {
+            SetSelection(List)
+        }
+    }
+
+    console.log(Selection)
     return (
         <div className="flex flex-col max-h-full">
         <div className="text-center">
             Bem-vindo ao Gigante
         </div>
-        <div className="flex justify-between items-center flex-wrap gap-12 overflow-y-scroll px-36 mt-12 pb-12">
+        <div className="flex justify-center items-center flex-wrap gap-12 overflow-y-scroll px-36 mt-12 pb-12">
             {Pokemon.map((item, index) =>
             {
                 return (
                     <div
                         key={index}
-                        className="border-2 border-white bg-blue-400 rounded-lg w-48 h-60 flex text-white flex-col justify-center items-center relative"
-                        onClick={(e) => Clickma(e.nativeEvent)}
+                        className={
+                            `border-2 border-white rounded-lg w-48 h-60 flex text-white flex-col justify-center items-center relative `
+                            + (Selection.has(index) ? "bg-blue-600" : "bg-blue-400")
+                        }
+                        onClick={(e) => Clickma(e.nativeEvent, index)}
+                        onDoubleClick={(e) => DoubleClickma(e.nativeEvent, index)}
                     >
                         <p className="absolute top-2 left-2 unselectable">{item.pokedex}</p>
                         {
