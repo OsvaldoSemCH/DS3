@@ -2,10 +2,11 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import React, {useState, useEffect} from "react";
+import { clickSelection, doubleClickSelection, Selection } from "@/constants/selection";
 
 interface IPokemon
 {
-    id : number | null,
+    id : number,
     pokedex : number,
     name : string,
     nickname : string,
@@ -19,7 +20,7 @@ interface IPokemon
 export default function Home()
 {
     const [Pokemon, SetPokemon] = useState<IPokemon[]>([]);
-    const [Selection, SetSelection] = useState<Set<number>>(new Set([]));
+    const [Sel, SetSel] = useState<Selection<number, IPokemon>>(new Selection([]));
 
     useEffect(() =>
     {
@@ -38,74 +39,17 @@ export default function Home()
         })
     }, [])
 
-    function Clickma(e : MouseEvent, index : number)
-    {
-        const Ctrl = e.ctrlKey
-        const Shift = e.shiftKey
-
-        if(Shift)
-        {
-            
-        }else
-        if(Ctrl)
-        {
-            if(Selection.has(index))
-            {
-                let S = new Set(Selection)
-                S.delete(index)
-                SetSelection(S);
-                return
-            }
-            let S = new Set(Selection)
-            S.add(index)
-            SetSelection(S)
-        }else
-        {
-            if(Selection.size == 1 && Selection.has(index))
-            {
-                SetSelection(new Set([]))
-            }else
-            {
-                SetSelection(new Set([index]));
-            }
-        }
-    }
-
-    function DoubleClickma(e : MouseEvent, index : number)
-    {
-        const Ctrl = e.ctrlKey
-        const Shift = e.shiftKey
-
-        let List = new Set([index])
-        let Comp = Pokemon[index].pokedex;
-
-        for(let i = index + 1; i < Pokemon.length; ++i)
-        {
-            if(Pokemon[i].pokedex == Comp)
-            {
-                List.add(i)
-            }else
-            {
-                break;
-            }
-        }
-
-        if(Ctrl || Shift)
-        {
-            SetSelection(List.union(Selection))
-        }else
-        {
-            SetSelection(List)
-        }
-    }
-
-    console.log(Selection)
+    console.log(Sel)
     return (
-        <div className="flex flex-col max-h-full">
-        <div className="text-center">
-            Bem-vindo ao Gigante
+        <div className="flex flex-col max-h-full items-center">
+        <div className="fixed flex justify-center py-2 border-b border-solid border-black w-full gap-4 bg-blue-400 h-18">
+            <div className="flex flex-col">
+                <p>Capture Pokemon:</p>
+                <input type="text" className="bg-white rounded-md border border-gray-300 border-solid"/>
+            </div>
+            <button className="bg-blue-600 border-2 border-white border-solid text-white p-2 hover:bg-blue-500 rounded-md">Throw ball</button>
         </div>
-        <div className="flex justify-center items-center flex-wrap gap-12 overflow-y-scroll px-36 mt-12 pb-12">
+        <div className="flex justify-center items-center flex-wrap gap-12 overflow-y-scroll px-36 mt-18 py-12">
             {Pokemon.map((item, index) =>
             {
                 return (
@@ -113,10 +57,10 @@ export default function Home()
                         key={index}
                         className={
                             `border-2 border-white rounded-lg w-48 h-60 flex text-white flex-col justify-center items-center relative `
-                            + (Selection.has(index) ? "bg-blue-600" : "bg-blue-400")
+                            + (Sel.set.has(item.id) ? "bg-blue-700" : "bg-blue-500")
                         }
-                        onClick={(e) => Clickma(e.nativeEvent, index)}
-                        onDoubleClick={(e) => DoubleClickma(e.nativeEvent, index)}
+                        onClick={(e) => SetSel(clickSelection(e, item, Sel, Pokemon, (p) => p.id))}
+                        onDoubleClick={(e) => SetSel(doubleClickSelection(e, item, Sel, Pokemon, (p) => p.id, (p) => p.pokedex == Pokemon[index].pokedex))}
                     >
                         <p className="absolute top-2 left-2 unselectable">{item.pokedex}</p>
                         {
