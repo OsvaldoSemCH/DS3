@@ -3,7 +3,26 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import React, {useState, useEffect} from "react";
 import { clickSelection, doubleClickSelection, Selection } from "@/constants/selection";
+import { randomInt } from "crypto";
+import photo from "../136 - Copia.png"
 
+interface IPokemonData
+{
+    id : number,
+    name : string,
+    sprites : 
+    {
+        front_default : string
+    },
+    types : 
+    {
+        slot : number,
+        type : {name : string}
+    }[],
+    height : number,
+    weight : number,
+    base_experience : number
+}
 interface IPokemon
 {
     id : number,
@@ -21,6 +40,8 @@ export default function Home()
 {
     const [Pokemon, SetPokemon] = useState<IPokemon[]>([]);
     const [Sel, SetSel] = useState<Selection<number, IPokemon>>(new Selection([]));
+    const [Pkmn, SetPkmn] = useState<{name : string, sprite: string}>({name: "MissingNo.", sprite: photo.src});
+    const [PkmnNum, SetPkmnNum] = useState<number>(Math.floor(Math.random() * 1024 + 1));
 
     useEffect(() =>
     {
@@ -37,7 +58,32 @@ export default function Home()
         {
             SetPokemon(data);
         })
-    }, [])
+        
+
+        fetch(`https://pokeapi.co/api/v2/pokemon/${PkmnNum}`)
+        .then((res) => res.json())
+        .then((data : IPokemonData) => SetPkmn({name: data.name, sprite: data.sprites.front_default}))
+    }, [PkmnNum])
+
+    function CAP()
+    {
+        fetch
+        (
+            "http://localhost:8080/capture",
+            {
+                method: "POST",
+                headers: {"Authorization" : `Bearer ${localStorage.getItem("token")}`, "Content-Type": "application/json"},
+                body: JSON.stringify({pkmn: PkmnNum})
+            }
+        )
+        .then((res) => (res.json()))
+        .then((data) =>
+        {
+            console.log(data.message)
+        
+            SetPkmnNum(Math.floor(Math.random() * 1024 + 1))
+        })
+    }
 
     console.log(Sel)
     return (
@@ -45,9 +91,9 @@ export default function Home()
         <div className="fixed flex justify-center py-2 border-b border-solid border-black w-full gap-4 bg-blue-400 h-18">
             <div className="flex flex-col">
                 <p>Capture Pokemon:</p>
-                <input type="text" className="bg-white rounded-md border border-gray-300 border-solid"/>
+                <p className="font-bold">{Pkmn.name[0].toUpperCase() + Pkmn.name.substring(1)}</p>
             </div>
-            <button className="bg-blue-600 border-2 border-white border-solid text-white p-2 hover:bg-blue-500 rounded-md">Throw ball</button>
+            <button className="bg-blue-600 border-2 border-white border-solid text-white p-2 hover:bg-blue-500 rounded-md" onClick={() => CAP()}>Throw ball</button>
         </div>
         <div className="flex justify-center items-center flex-wrap gap-12 overflow-y-scroll px-36 mt-18 py-12">
             {Pokemon.map((item, index) =>
